@@ -20,13 +20,23 @@ import { FooterComponent } from '../../layout/footer.component';
         </p>
       </section>
 
-      <div class="team-grid animate-fade-in" style="animation-delay: 0.2s">
-        <div class="member-card" *ngFor="let member of team">
+      <div class="team-flex animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="member-card" *ngFor="let member of equipoFila1">
           <div class="member-avatar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <h3>{{member.name}}</h3>
-          <span class="member-role">Desarrollador de Software</span>
+          <span class="member-role">{{member.role}}</span>
+        </div>
+      </div>
+
+      <div class="team-flex animate-fade-in" style="animation-delay: 0.3s; margin-bottom: 8rem;">
+        <div class="member-card" *ngFor="let member of equipoFila2">
+          <div class="member-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <h3>{{member.name}}</h3>
+          <span class="member-role">{{member.role}}</span>
         </div>
       </div>
 
@@ -85,19 +95,24 @@ import { FooterComponent } from '../../layout/footer.component';
       line-height: 1.8;
     }
 
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* NUEVA CLASE FLEX PARA LAS FILAS */
+    .team-flex {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 2rem;
-      margin-bottom: 8rem;
+      margin-bottom: 2rem;
     }
+
     .member-card {
       background: var(--color-panel-bg);
       border: 1px solid var(--color-border);
-      padding: 3rem 2rem;
+      padding: 3rem 1.5rem; /* Ajustamos padding para que entre todo */
       text-align: center;
       transition: var(--transition-smooth);
       border-radius: 4px;
+      width: 240px; /* Ancho fijo para que entren 4 abajo */
+      flex: 0 1 240px;
     }
     .member-card:hover {
       border-color: var(--color-accent);
@@ -116,9 +131,9 @@ import { FooterComponent } from '../../layout/footer.component';
       color: var(--color-accent);
     }
     .member-avatar svg { width: 40px; }
-    .member-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    .member-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
     .member-role {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--color-accent);
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -157,24 +172,27 @@ import { FooterComponent } from '../../layout/footer.component';
       .team-header h2 { font-size: 2.25rem; }
       .mentors-section { padding: 2rem; margin-bottom: 4rem; }
       .mentors-grid { gap: 2rem; }
-      .team-grid { margin-bottom: 4rem; }
     }
 
     @media (max-width: 480px) {
       .team-header h2 { font-size: 1.75rem; }
-      .member-card { padding: 2rem 1.5rem; }
+      .member-card { padding: 2rem 1.5rem; width: 100%; flex: 1 1 auto; }
       .mentor-card h4 { font-size: 1.25rem; }
     }
   `]
 })
 export class AboutComponent {
-  team = [
-    { name: 'Luciano Cañas' },
-    { name: 'Lorena Paola Pereyra' },
-    { name: 'Agustin Nicolas Gallardo Rios' },
-    { name: 'Agustin Tanno' },
-    { name: 'Romina Vanesa Huk' },
-    { name: 'Nancy Maribel Morales' }
+  equipoFila1 = [
+    { name: 'Luciano Cañas', role: 'Desarrollo de Hardware & IoT' },
+    { name: 'Lorena Paola Pereyra', role: 'Scrum Master & QA Testing' },
+    { name: 'Agustin Nicolas Gallardo Rios', role: 'Frontend Developer & Diseño UI' }
+  ];
+
+  equipoFila2 = [
+    { name: 'Agustin Tanno', role: 'Frontend Developer & Integración Web' },
+    { name: 'Romina Vanesa Huk', role: 'Ingeniería de Hardware & Sensores' },
+    { name: 'Nancy Maribel Morales', role: 'Backend Developer & Arquitectura Cloud' },
+    { name: 'Julieta Cabrera', role: 'Backend Developer & Firebase' }
   ];
 
   mentors = [

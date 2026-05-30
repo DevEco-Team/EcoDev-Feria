@@ -8,7 +8,7 @@ import { FooterComponent } from '../../layout/footer.component';
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
-  template: `
+ template: `
     <app-navbar></app-navbar>
     <main class="home-container">
       <!-- Hero Section -->
@@ -17,12 +17,14 @@ import { FooterComponent } from '../../layout/footer.component';
           <span class="hero-tag">Proyecto Destacado 2026</span>
           <h1>Red de Microestaciones Inteligentes</h1>
           <p class="hero-description">
-            Monitoreo preventivo de la calidad del aire para la industria y la salud urbana. 
-            Tecnología IoT diseñada para proteger la vida y mejorar la eficiencia productiva.
+            Cuidamos el aire que respirás. Nuestras estaciones inteligentes miden la calidad del aire en tiempo real para proteger tu salud, prevenir accidentes y mejorar nuestro entorno de una forma sencilla y accesible.
+          </p>
+          <p class="hero-description" style="font-size: 0.9em; margin-top: -10px; color: #a0aec0;">
+            ¿Cómo funciona? Nuestra placa es el "cerebro" del equipo: recolecta los datos del ambiente al instante y los manda por internet para que puedas verlos en vivo desde cualquier pantalla.
           </p>
           <div class="hero-actions">
-            <button class="primary-btn" routerLink="/dashboard">Explorar Datos en Vivo</button>
-            <button class="secondary-btn" routerLink="/equipo">Conocer al Equipo</button>
+            <button class="primary-btn" routerLink="/dashboard">Ver Medición en Vivo</button>
+            <button class="secondary-btn" routerLink="/equipo">Quiénes Somos</button>
           </div>
         </div>
         <div class="hero-visual">
@@ -48,22 +50,22 @@ import { FooterComponent } from '../../layout/footer.component';
             <div class="feature-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H2z"></path></svg>
             </div>
-            <h3>Aplicación Industrial</h3>
-            <p>Centinela preventivo en plantas de alimentos. Detecta polvos en suspensión y previene explosiones y riesgos respiratorios.</p>
+            <h3>Cuidado en el Trabajo</h3>
+            <p>Funciona como un guardián invisible en fábricas y plantas. Detecta partículas en el aire para evitar accidentes y cuidar la salud respiratoria de los trabajadores.</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M6 21V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14"></path><path d="M9 21v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v4"></path><path d="M10 9h.01"></path><path d="M14 9h.01"></path><path d="M10 13h.01"></path><path d="M14 13h.01"></path></svg>
             </div>
-            <h3>Realidad del Peatón</h3>
-            <p>Monitoreo a nivel de calle en domos de seguridad. Captura el aire real que respiran los ciudadanos en Córdoba y Río Cuarto.</p>
+            <h3>El Aire en Nuestra Calle</h3>
+            <p>Instalados en la vía pública, nuestros equipos miden con exactitud qué tan limpio está el aire que respiramos todos los días los vecinos de Córdoba y Río Cuarto.</p>
           </div>
           <div class="feature-card">
             <div class="feature-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"></path><rect x="6" y="14" width="12" height="8" rx="1"></rect></svg>
             </div>
-            <h3>Sensores Avanzados</h3>
-            <p>Integración de sensores MQ135 (gases), Sharp (polvo) y DHT22 (temp/hum) en una red distribuida de bajo costo.</p>
+            <h3>Tecnología al Alcance de Todos</h3>
+            <p>Combinamos sensores económicos pero de alta precisión para medir gases, polvo, temperatura y humedad. Así logramos que esta herramienta pueda instalarse en cualquier barrio.</p>
           </div>
         </div>
       </section>
