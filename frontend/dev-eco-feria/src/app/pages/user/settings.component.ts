@@ -139,6 +139,7 @@ import { FooterComponent } from '../../layout/footer.component';
     @media (max-width: 900px) {
       .settings-grid { grid-template-columns: 1fr; gap: 2rem; }
       .settings-content { padding: 2rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; }
     }
   `]
 })
