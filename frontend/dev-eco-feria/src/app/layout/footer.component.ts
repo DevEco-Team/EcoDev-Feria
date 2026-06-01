@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
       <div class="footer-container">
         <div class="footer-main">
           <div class="footer-info">
-            <h3>Dev-Eco Team</h3>
+            <h3>Eco-Dev Team</h3>
             <p>Tecnicatura Superior en Desarrollo de Software</p>
             <p>Feria de Ciencias "Alberto Maiztegui" | 2026</p>
           </div>
@@ -23,7 +23,7 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; 2026 Dev-Eco Team. Innovación Tecnológica Aplicada.</p>
+          <p>&copy; 2026 Eco-Dev. Innovación Tecnológica Aplicada.</p>
           <div class="footer-tags">
             <span>IoT</span>
             <span>Angular</span>

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ThemeService } from '../services/theme.service';
 
 /**
  * Componente de la barra de navegación superior.
@@ -14,9 +15,9 @@ import { AuthService } from '../services/auth.service';
     <nav class="navbar animate-fade-in">
       <div class="navbar-container">
         <div class="brand" routerLink="/">
-          <img src="assets/icon.jpg" alt="Dev-Eco Logo" class="logo-img">
+          <img src="assets/icon.jpg" alt="Eco-Dev Logo" class="logo-img">
           <div class="brand-text">
-            <span class="brand-name">Dev-Eco Team</span>
+            <span class="brand-name">Eco-Dev</span>
             <span class="brand-tagline">Microestaciones Inteligentes</span>
           </div>
         </div>
@@ -34,6 +35,10 @@ import { AuthService } from '../services/auth.service';
                 <span class="dot pulse"></span> Red Online
               </span>
               <div class="nav-icons">
+                <button (click)="themeService.toggleTheme()" class="icon-link theme-toggle" [title]="themeService.isDarkMode() ? 'Modo Día' : 'Modo Noche'">
+                  <svg *ngIf="themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  <svg *ngIf="!themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
                 <a [routerLink]="authService.isLoggedIn() ? '/dashboard' : '/login'" (click)="closeMenu()" class="icon-link">
                   <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 </a>
@@ -50,6 +55,10 @@ import { AuthService } from '../services/auth.service';
             <span class="dot pulse"></span> Red Online
           </span>
           <div class="nav-icons">
+            <button (click)="themeService.toggleTheme()" class="icon-link theme-toggle" [title]="themeService.isDarkMode() ? 'Modo Día' : 'Modo Noche'">
+              <svg *ngIf="themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <svg *ngIf="!themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
             <a [routerLink]="authService.isLoggedIn() ? '/dashboard' : '/login'" class="icon-link" [title]="authService.isLoggedIn() ? 'Dashboard' : 'Iniciar Sesión'">
               <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
             </a>
@@ -65,6 +74,8 @@ import { AuthService } from '../services/auth.service';
 export class NavbarComponent {
   /** Servicio de autenticación para gestionar el estado de la sesión. */
   public authService = inject(AuthService);
+  /** Servicio de tema para gestionar el modo claro/oscuro. */
+  public themeService = inject(ThemeService);
   
   /** Indica si el menú móvil está abierto. */
   isMenuOpen = false;
@@ -74,11 +85,7 @@ export class NavbarComponent {
    */
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
-    if (this.isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+    this.updateBodyScroll();
   }
 
   /**
@@ -86,6 +93,16 @@ export class NavbarComponent {
    */
   closeMenu() {
     this.isMenuOpen = false;
-    document.body.style.overflow = 'auto';
+    this.updateBodyScroll();
+  }
+
+  private updateBodyScroll() {
+    if (this.isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = 'auto';
+      document.body.style.touchAction = 'auto';
+    }
   }
 }

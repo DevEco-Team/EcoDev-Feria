@@ -11,5 +11,5 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   /** Título de la aplicación. */
-  protected readonly title = signal('dev-eco-feria');
+  protected readonly title = signal('eco-dev');
 }
