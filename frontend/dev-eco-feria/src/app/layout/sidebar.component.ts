@@ -41,109 +41,30 @@ import { RouterModule } from '@angular/router';
       </div>
     </aside>
     <div class="sidebar-overlay" *ngIf="isOpen" (click)="closeSidebar()"></div>
-  `,
-  styles: [`
-    .sidebar {
-      width: 260px;
-      height: 100%;
-      background-color: var(--color-base);
-      border-right: 1px solid var(--color-border);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 1rem;
-      transition: transform 0.3s ease;
-      z-index: 1100;
-    }
-    .logo-container {
-      margin-bottom: 3rem;
-      display: flex;
-      justify-content: center;
-    }
-    .logo {
-      width: 48px;
-    }
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex: 1;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-    }
-    .icon {
-      width: 20px;
-      height: 20px;
-    }
-    .nav-item:hover {
-      background-color: var(--color-panel-bg);
-      color: var(--color-text);
-    }
-    .nav-item.active {
-      background-color: rgba(0, 255, 255, 0.1);
-      color: var(--color-accent);
-      border-left: 4px solid var(--color-accent);
-    }
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 2rem;
-    }
-    .cta-button {
-      width: 100%;
-      background-color: var(--color-cta);
-      color: var(--color-base);
-      border: none;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .cta-button:hover {
-      opacity: 0.9;
-    }
-
-    /* Mobile Styles */
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        transform: translateX(-100%);
-      }
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-      .sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        z-index: 1099;
-      }
-    }
-  `]
+  `
 })
+/**
+ * Componente que gestiona la barra lateral de navegación del dashboard.
+ */
 export class SidebarComponent {
+  /** Indica si la barra lateral está abierta (especialmente en dispositivos móviles). */
   @Input() isOpen = false;
+  /** Evento que se emite para solicitar el cierre de la barra lateral. */
   @Output() close = new EventEmitter<void>();
 
+  /**
+   * Maneja el clic en un elemento de navegación.
+   * Cierra la barra lateral automáticamente si se está en un dispositivo móvil.
+   */
   onItemClick() {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 1024) {
       this.closeSidebar();
     }
   }
 
+  /**
+   * Emite el evento para cerrar la barra lateral.
+   */
   closeSidebar() {
     this.close.emit();
   }

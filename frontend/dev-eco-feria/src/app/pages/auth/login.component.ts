@@ -46,82 +46,40 @@ import { FooterComponent } from '../../layout/footer.component';
       </div>
     </main>
     <app-footer></app-footer>
-  `,
-  styles: [`
-    .auth-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: calc(100vh - 160px);
-      padding: 2rem;
-    }
-    .auth-card {
-      background: var(--color-panel-bg);
-      border: 1px solid var(--color-border);
-      padding: 3rem;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 450px;
-      backdrop-filter: blur(10px);
-    }
-    .auth-header { text-align: center; margin-bottom: 2.5rem; }
-    .auth-header h2 { font-size: 2rem; margin-bottom: 0.5rem; color: var(--color-accent); }
-    .auth-header p { color: var(--color-text-muted); font-size: 0.9rem; }
-
-    .auth-form { display: flex; flex-direction: column; gap: 1.5rem; }
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.85rem; color: var(--color-text); font-weight: 500; }
-    .form-group input {
-      background: var(--color-base);
-      border: 1px solid var(--color-border);
-      padding: 0.8rem 1rem;
-      border-radius: 4px;
-      color: white;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus { border-color: var(--color-accent); }
-
-    .submit-btn {
-      background: var(--color-accent);
-      color: var(--color-base);
-      border: none;
-      padding: 1rem;
-      border-radius: 4px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: transform 0.2s;
-    }
-    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .error-message { color: #ff4d4d; font-size: 0.8rem; text-align: center; }
-
-    .auth-footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--color-text-muted); }
-    .auth-footer a { color: var(--color-accent); cursor: pointer; font-weight: 600; }
-    .auth-footer a:hover { text-decoration: underline; }
-
-    @media (max-width: 480px) {
-      .auth-card { padding: 2rem 1.5rem; }
-    }
-  `]
+  `
 })
+/**
+ * Componente que gestiona la autenticación de usuarios (inicio de sesión y registro).
+ */
 export class LoginComponent {
+  /** Servicio para gestionar la lógica de autenticación. */
   private authService = inject(AuthService);
+  /** Servicio de enrutamiento para la navegación. */
   private router = inject(Router);
+  /** Servicio para acceder a los parámetros de la ruta activa. */
   private route = inject(ActivatedRoute);
 
+  /** Indica si el formulario está en modo inicio de sesión (true) o registro (false). */
   isLogin = true;
+  /** Nombre de usuario o email ingresado en el formulario. */
   username = '';
+  /** Contraseña ingresada en el formulario. */
   password = '';
+  /** Indica si hubo un error en el proceso de autenticación. */
   error = false;
 
+  /**
+   * Cambia el modo del formulario entre inicio de sesión y registro.
+   */
   toggleMode() {
     this.isLogin = !this.isLogin;
     this.error = false;
   }
 
+  /**
+   * Procesa el envío del formulario de autenticación.
+   * Si las credenciales son válidas, redirige al usuario a la URL de retorno o al dashboard.
+   */
   onSubmit() {
     if (this.authService.login(this.username, this.password)) {
       const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';

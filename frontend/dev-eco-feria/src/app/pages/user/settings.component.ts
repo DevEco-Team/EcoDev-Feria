@@ -57,98 +57,27 @@ import { FooterComponent } from '../../layout/footer.component';
       </div>
     </main>
     <app-footer></app-footer>
-  `,
-  styles: [`
-    .settings-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 4rem 2rem;
-      min-height: 80vh;
-    }
-    .settings-grid {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 4rem;
-    }
-    .settings-sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    .settings-sidebar h3 { font-size: 1.5rem; color: var(--color-text); }
-    .settings-nav { display: flex; flex-direction: column; gap: 0.5rem; }
-    .settings-nav a {
-      padding: 0.75rem 1rem;
-      border-radius: 4px;
-      color: var(--color-text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .settings-nav a.active {
-      background: rgba(100, 255, 218, 0.1);
-      color: var(--color-accent);
-    }
-    .logout-btn {
-      margin-top: 2rem;
-      background: rgba(255, 77, 77, 0.1);
-      color: #ff4d4d;
-      border: 1px solid rgba(255, 77, 77, 0.2);
-      padding: 0.75rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .logout-btn:hover { background: rgba(255, 77, 77, 0.2); }
-
-    .settings-content {
-      background: var(--color-panel-bg);
-      border: 1px solid var(--color-border);
-      padding: 3rem;
-      border-radius: 8px;
-    }
-    .content-header { margin-bottom: 3rem; }
-    .content-header h2 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .content-header p { color: var(--color-text-muted); }
-
-    .settings-form { display: flex; flex-direction: column; gap: 2rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.85rem; color: var(--color-text-muted); }
-    .form-group input, .form-group textarea {
-      background: var(--color-base);
-      border: 1px solid var(--color-border);
-      padding: 0.8rem 1rem;
-      border-radius: 4px;
-      color: white;
-      outline: none;
-    }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--color-accent); }
-
-    .save-btn {
-      background: var(--color-accent);
-      color: var(--color-base);
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 4px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .save-btn:disabled { opacity: 0.5; }
-
-    @media (max-width: 900px) {
-      .settings-grid { grid-template-columns: 1fr; gap: 2rem; }
-      .settings-content { padding: 2rem 1.5rem; }
-    }
-  `]
+  `
 })
+/**
+ * Componente que permite al usuario gestionar su perfil y configuración personal.
+ * Incluye opciones para editar datos personales y cerrar sesión.
+ */
 export class UserSettingsComponent {
+  /** Servicio para gestionar la autenticación y datos del usuario actual. */
   private authService = inject(AuthService);
+  /** Servicio de enrutamiento para la navegación. */
   private router = inject(Router);
 
+  /** Copia local de los datos del usuario para su edición en el formulario. */
   userData = { ...this.authService.currentUser() };
+  /** Estado reactivo que indica si se están guardando los cambios. */
   saving = signal(false);
 
+  /**
+   * Simula el guardado de los cambios del perfil de usuario.
+   * Actualiza los datos a través del AuthService tras un breve retraso.
+   */
   saveChanges() {
     this.saving.set(true);
     setTimeout(() => {
@@ -158,6 +87,9 @@ export class UserSettingsComponent {
     }, 1000);
   }
 
+  /**
+   * Finaliza la sesión del usuario y lo redirige a la página principal.
+   */
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);

@@ -4,6 +4,9 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar.component';
 import { SidebarComponent } from './sidebar.component';
 
+/**
+ * Diseño principal para el panel de control, que incluye la barra lateral y la de navegación.
+ */
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
@@ -29,67 +32,9 @@ import { SidebarComponent } from './sidebar.component';
         </div>
       </div>
     </div>
-  `,
-  styles: [`
-    .layout-container {
-      display: flex;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-    }
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-    .dashboard-header {
-      display: flex;
-      align-items: center;
-      background: rgba(10, 25, 47, 0.95);
-      border-bottom: 1px solid var(--color-border);
-      z-index: 100;
-    }
-    .flex-1 { flex: 1; }
-    .sidebar-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--color-accent);
-      padding: 1rem;
-      cursor: pointer;
-      z-index: 101;
-    }
-    .sidebar-toggle svg {
-      width: 24px;
-      height: 24px;
-    }
-    .content-area {
-      flex: 1;
-      padding: 0;
-      overflow-y: auto;
-      background-color: var(--color-base);
-    }
-
-    @media (max-width: 768px) {
-      .sidebar-toggle {
-        display: block;
-      }
-      .dashboard-header ::ng-deep .navbar {
-        height: 60px;
-        background: transparent;
-        border-bottom: none;
-      }
-      .dashboard-header ::ng-deep .navbar-container {
-        padding: 0 1rem 0 0;
-      }
-      .dashboard-header ::ng-deep .brand {
-        display: none; /* Hide brand in navbar on mobile dashboard to save space, toggle is enough */
-      }
-    }
-  `]
+  `
 })
 export class DashboardLayoutComponent {
+  /** Estado de apertura de la barra lateral. */
   isSidebarOpen = false;
 }

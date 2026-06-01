@@ -96,71 +96,11 @@ import { CommonModule } from '@angular/common';
         </div>
       </div>
     </div>
-  `,
-  styles: [`
-    .dashboard-view {
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-      padding: 2rem;
-    }
-    .view-header h2 { font-size: 2.25rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .view-subtitle { color: var(--color-accent); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; }
-    .view-header p { color: var(--color-text-muted); }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
-    }
-    .metric-card {
-      background: var(--color-panel-bg);
-      border: 1px solid var(--color-border);
-      padding: 1.75rem;
-      border-radius: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-      transition: var(--transition-smooth);
-      animation: fadeIn 0.6s ease-out forwards;
-      opacity: 0;
-    }
-    .metric-card:hover { border-color: var(--color-accent); transform: translateY(-5px); }
-    .metric-icon { color: var(--color-accent); width: 24px; height: 24px; }
-    .metric-info { display: flex; flex-direction: column; gap: 0.5rem; }
-    .metric-label { font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase; }
-    .metric-value { font-size: 1.75rem; font-weight: 700; font-family: 'Space Mono', monospace; }
-    .metric-change { font-size: 0.75rem; font-weight: 500; }
-    .metric-change.positive { color: var(--color-accent); }
-    .metric-change.neutral { color: var(--color-text-muted); }
-
-    .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
-    .content-card { background: var(--color-panel-bg); border: 1px solid var(--color-border); padding: 2rem; border-radius: 4px; opacity: 0; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .sensor-tag { font-size: 0.7rem; color: var(--color-accent); border: 1px solid var(--color-accent); padding: 2px 8px; border-radius: 4px; }
-    
-    .chart-placeholder.academic { height: 200px; display: flex; align-items: flex-end; gap: 1rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
-    .academic-bar { flex: 1; background: linear-gradient(to top, var(--color-accent), transparent); opacity: 0.6; border-radius: 2px; position: relative; }
-    .academic-bar::after { content: attr(label); position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: var(--color-text-muted); }
-
-    .actuators-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
-    .actuator-item { display: flex; justify-content: space-between; padding: 1rem; background: rgba(255, 255, 255, 0.02); border-radius: 4px; border: 1px solid var(--color-border); }
-    .actuator-item.active { border-color: var(--color-accent); }
-    .act-name { font-size: 0.9rem; font-weight: 500; }
-    .act-status { font-size: 0.8rem; color: var(--color-accent); }
-    
-    .alert-box { padding: 1rem; background: rgba(100, 255, 218, 0.05); border-left: 4px solid var(--color-accent); }
-    .alert-box p { font-size: 0.8rem; color: var(--color-text-muted); font-style: italic; }
-
-    @media (max-width: 1024px) { 
-      .main-grid { grid-template-columns: 1fr; } 
-    }
-    @media (max-width: 768px) {
-      .dashboard-view { padding: 1.5rem; gap: 1.5rem; }
-      .view-header h2 { font-size: 1.75rem; }
-      .metric-value { font-size: 1.5rem; }
-      .chart-placeholder.academic { gap: 0.5rem; }
-    }
-  `]
+  `
 })
+/**
+ * Componente que representa el panel general de monitorización.
+ * Muestra métricas en tiempo real de calidad del aire, partículas de polvo,
+ * humedad y temperatura, además del estado de los actuadores del sistema.
+ */
 export class GeneralPanelComponent {}

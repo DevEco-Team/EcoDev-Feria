@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Componente que representa el pie de página de la aplicación.
+ */
 @Component({
   selector: 'app-footer',
   standalone: true,
@@ -30,59 +33,6 @@ import { CommonModule } from '@angular/common';
         </div>
       </div>
     </footer>
-  `,
-  styles: [`
-    .footer {
-      background: #020c1b;
-      border-top: 1px solid var(--color-border);
-      padding: 4rem 2rem 2rem;
-      margin-top: auto;
-    }
-    .footer-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .footer-main {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 4rem;
-      margin-bottom: 4rem;
-    }
-    .footer-info h3, .footer-project h4 {
-      color: var(--color-accent);
-      margin-bottom: 1rem;
-    }
-    .footer-info p, .footer-project p {
-      color: var(--color-text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-    .footer-bottom {
-      border-top: 1px solid var(--color-border);
-      padding-top: 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-    }
-    .footer-bottom p {
-      color: var(--color-text-muted);
-      font-size: 0.8rem;
-    }
-    .footer-tags {
-      display: flex;
-      gap: 1rem;
-    }
-    .footer-tags span {
-      font-size: 0.7rem;
-      color: var(--color-accent);
-      background: rgba(100, 255, 218, 0.05);
-      padding: 0.2rem 0.6rem;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-  `]
+  `
 })
 export class FooterComponent {}
