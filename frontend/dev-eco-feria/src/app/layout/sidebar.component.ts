@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,7 +10,7 @@ import { RouterModule } from '@angular/router';
   template: `
     <aside class="sidebar" [class.mobile-open]="isOpen">
       <div class="logo-container">
-        <img src="assets/icon.jpg" alt="DevEco Logo" class="logo">
+        <img src="assets/icon.jpg" alt="Eco-Dev Logo" class="logo">
       </div>
       <nav class="nav-menu">
         <a routerLink="/dashboard/general" routerLinkActive="active" class="nav-item" (click)="onItemClick()">
@@ -37,7 +38,15 @@ import { RouterModule } from '@angular/router';
         </a>
       </nav>
       <div class="sidebar-footer">
-        <button class="cta-button">Descargar Reporte</button>
+        <button class="cta-button" (click)="onItemClick()">Descargar Reporte</button>
+        <button class="logout-link" (click)="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Cerrar Sesión
+        </button>
       </div>
     </aside>
     <div class="sidebar-overlay" *ngIf="isOpen" (click)="closeSidebar()"></div>
@@ -51,6 +60,9 @@ export class SidebarComponent {
   @Input() isOpen = false;
   /** Evento que se emite para solicitar el cierre de la barra lateral. */
   @Output() close = new EventEmitter<void>();
+
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   /**
    * Maneja el clic en un elemento de navegación.
@@ -67,5 +79,14 @@ export class SidebarComponent {
    */
   closeSidebar() {
     this.close.emit();
+  }
+
+  /**
+   * Cierra la sesión del usuario y redirige al inicio.
+   */
+  logout() {
+    this.authService.logout();
+    this.closeSidebar();
+    this.router.navigate(['/']);
   }
 }

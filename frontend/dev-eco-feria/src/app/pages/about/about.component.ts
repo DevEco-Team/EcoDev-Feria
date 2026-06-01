@@ -11,7 +11,7 @@ import { FooterComponent } from '../../layout/footer.component';
     <app-navbar></app-navbar>
     <main class="about-container">
       <section class="team-header animate-fade-in">
-        <span class="view-subtitle">Dev-Eco Team</span>
+        <span class="view-subtitle">Eco-Dev</span>
         <h2>Integrantes del Proyecto</h2>
         <div class="divider"></div>
         <p class="about-intro">
@@ -64,7 +64,7 @@ import { FooterComponent } from '../../layout/footer.component';
   `
 })
 /**
- * Componente que muestra la información sobre el equipo de desarrollo del proyecto Dev-Eco.
+ * Componente que muestra la información sobre el equipo de desarrollo del proyecto Eco-Dev.
  */
 export class AboutComponent {
   /** Primera fila del equipo de desarrollo, enfocada en hardware, QA y UI. */

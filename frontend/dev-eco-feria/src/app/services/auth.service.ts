@@ -23,7 +23,7 @@ export class AuthService {
 
   login(username: string, password: string): boolean {
     if (username === '1234' && password === '1234') {
-      const user = { id: '1', name: 'Usuario Piloto', email: 'piloto@deveco.com' };
+      const user = { id: '1', name: 'Usuario Piloto', email: 'piloto@ecodev.com' };
       this._currentUser.set(user);
       if (isPlatformBrowser(this.platformId)) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -41,7 +41,14 @@ export class AuthService {
   }
 
   updateUser(userData: any) {
-    const updated = { ...this._currentUser(), ...userData };
+    const currentUser = this._currentUser();
+    const updated = { ...currentUser, ...userData };
+    
+    // Si userData tiene notificaciones, las mezclamos con las existentes si las hubiera
+    if (userData.notifications && currentUser?.notifications) {
+      updated.notifications = { ...currentUser.notifications, ...userData.notifications };
+    }
+    
     this._currentUser.set(updated);
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('user', JSON.stringify(updated));

@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-general-panel',
@@ -8,8 +10,20 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="dashboard-view animate-fade-in">
       <header class="view-header">
-        <span class="view-subtitle">Red de Microestaciones Inteligentes</span>
-        <h2>Monitorización de Calidad del Aire</h2>
+        <div class="header-main">
+          <div class="header-text">
+            <span class="view-subtitle">Red de Microestaciones Inteligentes</span>
+            <h2>Monitorización de Calidad del Aire</h2>
+          </div>
+          <button class="logout-btn-panel" (click)="logout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Salir</span>
+          </button>
+        </div>
         <p>Datos en tiempo real recolectados por nodos ESP32 (MQ135, Sharp GP2Y, DHT22).</p>
       </header>
 
@@ -98,9 +112,12 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-/**
- * Componente que representa el panel general de monitorización.
- * Muestra métricas en tiempo real de calidad del aire, partículas de polvo,
- * humedad y temperatura, además del estado de los actuadores del sistema.
- */
-export class GeneralPanelComponent {}
+export class GeneralPanelComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
+}
