@@ -84,7 +84,7 @@ export class AboutComponent {
 
   /** Lista de profesores que supervisan el proyecto. */
   mentors = [
-    { name: 'Castro Fabiana' },
-    { name: 'Giraudo Maximiliano' }
+    { name: 'Ing. Castro Fabiana' },
+    { name: 'Lic. Giraudo Maximiliano' }
   ];
 }

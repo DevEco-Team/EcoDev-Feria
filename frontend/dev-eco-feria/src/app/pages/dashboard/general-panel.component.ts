@@ -24,7 +24,7 @@ import { Router } from '@angular/router';
             <span>Salir</span>
           </button>
         </div>
-        <p>Datos en tiempo real recolectados por nodos ESP32 (MQ135, Sharp GP2Y, DHT22).</p>
+        <p>Prototipo de visualización para los datos que serán recolectados por futuros nodos ESP32 (MQ135, Sharp GP2Y, DHT22).</p>
       </header>
 
       <!-- Métricas Específicas del Proyecto -->

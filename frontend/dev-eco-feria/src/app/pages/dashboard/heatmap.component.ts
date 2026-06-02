@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="dashboard-view animate-fade-in">
       <header class="view-header">
-        <h2>Mapa de Calor</h2>
-        <p>Visualización en tiempo real de la densidad de visitantes en el recinto.</p>
+        <h2>Mapa de Calidad del Aire</h2>
+        <p>Futura visualización en tiempo real de la calidad del aire en diferentes puntos del hogar o entorno.</p>
       </header>
 
       <div class="map-container">
@@ -30,9 +30,9 @@ import { CommonModule } from '@angular/common';
             <label><input type="checkbox"> Zonas de Salida</label>
           </div>
           <div class="legend">
-            <div class="legend-item"><span class="box high"></span> Alta Densidad</div>
-            <div class="legend-item"><span class="box med"></span> Media Densidad</div>
-            <div class="legend-item"><span class="box low"></span> Baja Densidad</div>
+            <div class="legend-item"><span class="box high"></span> Alta Concentración</div>
+            <div class="legend-item"><span class="box med"></span> Media Concentración</div>
+            <div class="legend-item"><span class="box low"></span> Baja Concentración</div>
           </div>
         </div>
       </div>
