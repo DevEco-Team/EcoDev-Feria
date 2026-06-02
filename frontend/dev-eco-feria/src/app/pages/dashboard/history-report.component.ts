@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="dashboard-view animate-fade-in">
       <header class="view-header">
-        <h2>Historial y Reportes</h2>
-        <p>Consulta el registro de actividades y descarga informes detallados.</p>
+        <h2>Historial y Reportes (Proyectado)</h2>
+        <p>Podrás consultar el registro de mediciones y descargar informes detallados del aire en tu hogar.</p>
       </header>
 
       <div class="filters-bar">
@@ -59,11 +59,11 @@ import { CommonModule } from '@angular/common';
  * Permite filtrar datos por fecha y realizar búsquedas, además de exportar la información.
  */
 export class HistoryReportComponent {
-  /** Lista de datos históricos de eventos para mostrar en la tabla. */
+  /** Lista de datos simulados de eventos para mostrar cómo se vería el historial. */
   historyData = [
-    { id: '1024', date: '2026-05-27 10:24', event: 'Charla Magistral', location: 'Auditorio A', status: 'completado' },
-    { id: '1023', date: '2026-05-27 09:45', event: 'Acceso General', location: 'Entrada Norte', status: 'completado' },
-    { id: '1022', date: '2026-05-27 09:00', event: 'Sincronización', location: 'Sistemas', status: 'completado' },
-    { id: '1021', date: '2026-05-27 11:30', event: 'Taller Solar', location: 'Stand 12', status: 'pendiente' },
+    { id: '1024', date: '2026-05-27 10:24', event: 'Detección CO2 Elevado', location: 'Cocina', status: 'alerta' },
+    { id: '1023', date: '2026-05-27 09:45', event: 'Nivel PM Óptimo', location: 'Dormitorio', status: 'completado' },
+    { id: '1022', date: '2026-05-27 09:00', event: 'Sincronización Nodo', location: 'Living', status: 'completado' },
+    { id: '1021', date: '2026-05-27 11:30', event: 'Pico de Humedad', location: 'Baño', status: 'notificación' },
   ];
 }
