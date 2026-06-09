@@ -1,4 +1,10 @@
 {
+  "name": "frontend-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm install --prefix dev-eco-feria && npm run build --prefix dev-eco-feria",
+    "start": "npm run serve:ssr:dev-eco-feria --prefix dev-eco-feria"
+  },
   "dependencies": {
     "angular": "^1.8.3",
     "cli": "^1.0.1"
