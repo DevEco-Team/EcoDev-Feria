@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { FirestoreService, Medicion } from '../services/firestore.service';
+import { ExportService } from '../services/export.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,7 +12,7 @@ import { RouterModule } from '@angular/router';
   template: `
     <aside class="sidebar" [class.mobile-open]="isOpen">
       <div class="logo-container">
-        <img src="assets/icon.jpg" alt="DevEco Logo" class="logo">
+        <img src="assets/icon.jpg" alt="Eco-Dev Logo" class="logo">
       </div>
       <nav class="nav-menu">
         <a routerLink="/dashboard/general" routerLinkActive="active" class="nav-item" (click)="onItemClick()">
@@ -37,114 +40,105 @@ import { RouterModule } from '@angular/router';
         </a>
       </nav>
       <div class="sidebar-footer">
-        <button class="cta-button">Descargar Reporte</button>
+        <button class="cta-button" (click)="downloadFullReport()">Descargar Reporte</button>
+        <button class="logout-link" (click)="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Cerrar Sesión
+        </button>
       </div>
     </aside>
     <div class="sidebar-overlay" *ngIf="isOpen" (click)="closeSidebar()"></div>
-  `,
-  styles: [`
-    .sidebar {
-      width: 260px;
-      height: 100%;
-      background-color: var(--color-base);
-      border-right: 1px solid var(--color-border);
-      display: flex;
-      flex-direction: column;
-      padding: 1.5rem 1rem;
-      transition: transform 0.3s ease;
-      z-index: 1100;
-    }
-    .logo-container {
-      margin-bottom: 3rem;
-      display: flex;
-      justify-content: center;
-    }
-    .logo {
-      width: 48px;
-    }
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex: 1;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-    }
-    .icon {
-      width: 20px;
-      height: 20px;
-    }
-    .nav-item:hover {
-      background-color: var(--color-panel-bg);
-      color: var(--color-text);
-    }
-    .nav-item.active {
-      background-color: rgba(0, 255, 255, 0.1);
-      color: var(--color-accent);
-      border-left: 4px solid var(--color-accent);
-    }
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 2rem;
-    }
-    .cta-button {
-      width: 100%;
-      background-color: var(--color-cta);
-      color: var(--color-base);
-      border: none;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .cta-button:hover {
-      opacity: 0.9;
-    }
-
-    /* Mobile Styles */
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        transform: translateX(-100%);
-      }
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-      .sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        z-index: 1099;
-      }
-    }
-  `]
+  `
 })
 export class SidebarComponent {
   @Input() isOpen = false;
   @Output() close = new EventEmitter<void>();
 
+  private authService = inject(AuthService);
+  private firestoreService = inject(FirestoreService);
+  private exportService = inject(ExportService);
+  private router = inject(Router);
+
   onItemClick() {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 1024) {
       this.closeSidebar();
     }
   }
 
   closeSidebar() {
     this.close.emit();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.closeSidebar();
+    this.router.navigate(['/']);
+  }
+
+  downloadFullReport() {
+    this.onItemClick();
+    
+    // Obtener datos actuales para el reporte
+    this.firestoreService.getRTDBMedicionesHistory(40, (mediciones) => {
+      const stations = [
+        { id: 'plaza_san_martin', name: 'Plaza San Martín' },
+        { id: 'av_colon_gral_paz', name: 'Av. Colón y Gral. Paz' },
+        { id: 'terminal_omnibus', name: 'Terminal de Ómnibus' },
+        { id: 'microestacion_01', name: 'Microestación 01' }
+      ];
+
+      let htmlContent = `
+        <h1 style="color: #0d9488; text-align: center;">REPORTE DE CALIDAD DEL AIRE - DEVECO FERIA</h1>
+        <p style="text-align: center;"><i>Fecha de generación: ${new Date().toLocaleString()}</i></p>
+        <hr>
+        <h2>1. Resumen Ejecutivo</h2>
+        <p>El presente documento detalla el estado actual de la red de microestaciones de monitoreo ambiental desplegadas en puntos estratégicos. Los sensores analizan parámetros críticos para la salud pública y el medio ambiente.</p>
+        
+        <h2>2. Estado por Estación</h2>
+      `;
+
+      stations.forEach(s => {
+        const latest = mediciones.find(m => m.estacion_id === s.id);
+        htmlContent += `
+          <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc;">
+            <h3 style="color: #2563eb;">${s.name}</h3>
+            ${latest ? `
+              <ul>
+                <li><b>Estado General:</b> ${latest.estado_calidad_aire}</li>
+                <li><b>Dióxido de Carbono:</b> ${latest.co2} ppm</li>
+                <li><b>Partículas PM2.5:</b> ${latest.particulas} mg/m³</li>
+                <li><b>Humedad:</b> ${latest.humedad}%</li>
+                <li><b>Temperatura:</b> ${latest.temperatura}°C</li>
+                <li><b>Benceno:</b> ${latest.benceno} ppb</li>
+                <li><b>Presencia de Humo:</b> ${latest.humo} u</li>
+              </ul>
+            ` : '<p><i>No se registran datos recientes para esta estación.</i></p>'}
+          </div>
+        `;
+      });
+
+      htmlContent += `
+        <h2>3. Conclusiones y Recomendaciones</h2>
+        <p>Basado en los niveles de CO2 y Partículas PM2.5 detectados, se recomienda ${this.getRecommendation(mediciones)}.</p>
+        <br>
+        <p style="font-size: 0.8rem; color: #666;">Sistema DevEco Feria - Monitoreo en Tiempo Real</p>
+      `;
+
+      this.exportService.exportToWord(htmlContent, 'Reporte_Ambiental_Completo');
+    });
+  }
+
+  private getRecommendation(mediciones: Medicion[]): string {
+    const avgCO2 = mediciones.length > 0 
+      ? mediciones.reduce((acc, m) => acc + (m.co2 || 0), 0) / mediciones.length 
+      : 0;
+    
+    if (avgCO2 > 800) return 'incrementar la ventilación en áreas cerradas y monitorear focos de emisión.';
+    if (avgCO2 > 600) return 'mantener el monitoreo preventivo y asegurar circulación de aire.';
+    return 'continuar con las actividades normales dado que los niveles son óptimos.';
   }
 }

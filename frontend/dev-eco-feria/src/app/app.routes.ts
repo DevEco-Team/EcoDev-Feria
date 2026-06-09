@@ -12,8 +12,7 @@ import { authGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'equipo', component: AboutComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'perfil', component: UserSettingsComponent, canActivate: [authGuard] },
+  { path: 'auth/login', component: LoginComponent },
   { 
     path: 'dashboard', 
     component: DashboardLayoutComponent,
@@ -25,5 +24,6 @@ export const routes: Routes = [
       { path: 'heatmap', component: HeatmapComponent }
     ]
   },
+  { path: 'ajustes', component: UserSettingsComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];

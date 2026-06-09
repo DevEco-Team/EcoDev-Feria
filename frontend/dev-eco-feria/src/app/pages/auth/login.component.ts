@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { MessageService } from '../../services/message.service';
 import { NavbarComponent } from '../../layout/navbar.component';
 import { FooterComponent } from '../../layout/footer.component';
 
@@ -19,22 +20,33 @@ import { FooterComponent } from '../../layout/footer.component';
           <p>{{isLogin ? 'Accede al panel de control de tu red' : 'Crea una cuenta para monitorear tus microestaciones'}}</p>
         </header>
 
-        <form (ngSubmit)="onSubmit()" #authForm="ngForm" class="auth-form">
-          <div class="form-group">
-            <label for="username">Usuario / Email</label>
-            <input type="text" id="username" name="username" [(ngModel)]="username" required placeholder="1234">
+        <!-- Diálogo de Mensaje Custom -->
+        <div *ngIf="messageService.message() as msg" class="custom-dialog" [class]="msg.type">
+          <div class="dialog-content">
+            <strong>{{msg.title}}</strong>
+            <p>{{msg.text}}</p>
+            <button (click)="messageService.clearMessage()">Cerrar</button>
           </div>
-          <div class="form-group">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" [(ngModel)]="password" required placeholder="••••">
+        </div>
+
+        <form (ngSubmit)="onSubmit()" #authForm="ngForm" class="auth-form">
+          <div class="form-group" *ngIf="!isLogin">
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" [(ngModel)]="nombre" required placeholder="Tu nombre">
           </div>
           
-          <div *ngIf="error" class="error-message">
-            Credenciales incorrectas. Intenta con "1234".
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" name="email" [(ngModel)]="email" required placeholder="tu@email.com">
           </div>
-
-          <button type="submit" class="submit-btn" [disabled]="!authForm.valid">
-            {{isLogin ? 'Entrar' : 'Crear Cuenta'}}
+          
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" [(ngModel)]="password" required placeholder="••••••••">
+          </div>
+          
+          <button type="submit" class="submit-btn" [disabled]="!authForm.valid || isLoading()">
+            {{ isLoading() ? 'Procesando...' : (isLogin ? 'Entrar' : 'Crear Cuenta') }}
           </button>
         </form>
 
@@ -46,88 +58,58 @@ import { FooterComponent } from '../../layout/footer.component';
       </div>
     </main>
     <app-footer></app-footer>
-  `,
-  styles: [`
-    .auth-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: calc(100vh - 160px);
-      padding: 2rem;
-    }
-    .auth-card {
-      background: var(--color-panel-bg);
-      border: 1px solid var(--color-border);
-      padding: 3rem;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 450px;
-      backdrop-filter: blur(10px);
-    }
-    .auth-header { text-align: center; margin-bottom: 2.5rem; }
-    .auth-header h2 { font-size: 2rem; margin-bottom: 0.5rem; color: var(--color-accent); }
-    .auth-header p { color: var(--color-text-muted); font-size: 0.9rem; }
-
-    .auth-form { display: flex; flex-direction: column; gap: 1.5rem; }
-    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.85rem; color: var(--color-text); font-weight: 500; }
-    .form-group input {
-      background: var(--color-base);
-      border: 1px solid var(--color-border);
-      padding: 0.8rem 1rem;
-      border-radius: 4px;
-      color: white;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-group input:focus { border-color: var(--color-accent); }
-
-    .submit-btn {
-      background: var(--color-accent);
-      color: var(--color-base);
-      border: none;
-      padding: 1rem;
-      border-radius: 4px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 1rem;
-      transition: transform 0.2s;
-    }
-    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .error-message { color: #ff4d4d; font-size: 0.8rem; text-align: center; }
-
-    .auth-footer { margin-top: 2rem; text-align: center; font-size: 0.9rem; color: var(--color-text-muted); }
-    .auth-footer a { color: var(--color-accent); cursor: pointer; font-weight: 600; }
-    .auth-footer a:hover { text-decoration: underline; }
-
-    @media (max-width: 480px) {
-      .auth-card { padding: 2rem 1.5rem; }
-    }
-  `]
+  `
 })
 export class LoginComponent {
   private authService = inject(AuthService);
+  public messageService = inject(MessageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   isLogin = true;
-  username = '';
+  isLoading = signal(false);
+  
+  nombre = '';
+  email = '';
   password = '';
-  error = false;
 
   toggleMode() {
     this.isLogin = !this.isLogin;
-    this.error = false;
+    this.messageService.clearMessage();
   }
 
-  onSubmit() {
-    if (this.authService.login(this.username, this.password)) {
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-      this.router.navigateByUrl(returnUrl);
+  async onSubmit() {
+    this.isLoading.set(true);
+    this.messageService.clearMessage();
+
+    if (this.isLogin) {
+      const result = await this.authService.login(this.email, this.password);
+      if (result.success) {
+        this.messageService.showMessage('¡Bienvenido!', 'Sesión iniciada correctamente.', 'success');
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        setTimeout(() => this.router.navigateByUrl(returnUrl), 1500);
+      } else {
+        this.messageService.showMessage('Error de Acceso', this.translateError(result.error), 'error');
+      }
     } else {
-      this.error = true;
+      const result = await this.authService.register(this.email, this.password, this.nombre);
+      if (result.success) {
+        this.messageService.showMessage('Cuenta Creada', 'Te has registrado exitosamente. Redirigiendo...', 'success');
+        setTimeout(() => this.router.navigateByUrl('/dashboard'), 2000);
+      } else {
+        this.messageService.showMessage('Error de Registro', this.translateError(result.error), 'error');
+      }
     }
+    this.isLoading.set(false);
+  }
+
+  private translateError(error: string): string {
+    if (error.includes('auth/invalid-credential')) return 'Credenciales incorrectas.';
+    if (error.includes('auth/user-not-found')) return 'Usuario no encontrado.';
+    if (error.includes('auth/wrong-password')) return 'Contraseña incorrecta.';
+    if (error.includes('auth/email-already-in-use')) return 'Este correo ya está registrado.';
+    if (error.includes('auth/weak-password')) return 'La contraseña debe tener al menos 6 caracteres.';
+    if (error.includes('auth/invalid-email')) return 'El formato del correo no es válido.';
+    return 'Ocurrió un error inesperado. Inténtalo de nuevo.';
   }
 }

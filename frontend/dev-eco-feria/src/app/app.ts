@@ -6,6 +6,7 @@ import { db } from '../firebase'; // ../ nos saca de la carpeta app para buscar 
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
