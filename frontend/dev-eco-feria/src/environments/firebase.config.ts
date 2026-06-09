@@ -1,6 +1,7 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyBtx_EaqNs0RBu6BC8s16kVqxizO0iQdE",
+  apiKey: "AIzaSyBtx_EaqNs0RBu6BC8s16kVqxizOOiQQdE",
   authDomain: "deveco-feria-87930.firebaseapp.com",
+  databaseURL: "https://deveco-feria-87930-default-rtdb.firebaseio.com",
   projectId: "deveco-feria-87930",
   storageBucket: "deveco-feria-87930.firebasestorage.app",
   messagingSenderId: "1016015429921",
