@@ -1,12 +1,9 @@
 {
   "name": "frontend-root",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "npm install --prefix dev-eco-feria && npm run build --prefix dev-eco-feria",
-    "start": "npm run serve:ssr:dev-eco-feria --prefix dev-eco-feria"
-  },
-  "dependencies": {
-    "angular": "^1.8.3",
-    "cli": "^1.0.1"
+    "build": "cd dev-eco-feria && npm install --legacy-peer-deps && NODE_OPTIONS=--max-old-space-size=2048 npm run build",
+    "start": "cd dev-eco-feria && npm run serve:ssr:dev-eco-feria"
   }
 }
