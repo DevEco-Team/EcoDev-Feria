@@ -55,9 +55,95 @@
   100% { box-shadow: 0 0 5px rgba(100, 255, 218, 0.1); }
 }
 
+.user-name-nav {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-right: 0.5rem;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 1024px) {
+  .user-name-nav {
+    margin-right: 0.25rem;
+  }
+}
+
 .animate-fade-in {
   opacity: 0;
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Auth Dialogs */
+.custom-dialog {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  animation: slideIn 0.3s ease-out;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.custom-dialog.success {
+  background: rgba(82, 183, 136, 0.1);
+  border: 1px solid var(--color-cta);
+  color: #52b788;
+}
+
+.custom-dialog.error {
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+}
+
+.custom-dialog.info {
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+.dialog-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dialog-content strong {
+  font-size: 1rem;
+  font-family: var(--font-heading);
+}
+
+.dialog-content p {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.9;
+  color: inherit;
+}
+
+.dialog-content button {
+  align-self: flex-end;
+  background: none;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.dialog-content button:hover {
+  background: currentColor;
+  color: var(--color-base);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 * {
@@ -203,12 +289,6 @@ img {
   overflow-x: hidden;
 }
 
-@media (max-width: 1024px) {
-  .layout-container {
-    flex-direction: column;
-  }
-}
-
 .dashboard-body {
   display: flex;
   flex: 1;
@@ -234,14 +314,12 @@ img {
 .dashboard-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: var(--color-header-bg);
   border-bottom: 1px solid var(--color-border);
   z-index: 100;
   min-height: 60px;
-}
-
-.breadcrumb {
-  padding-left: 1rem;
+  padding: 0 1rem;
 }
 
 .sidebar-toggle {
@@ -249,8 +327,7 @@ img {
   background: var(--color-accent-subtle);
   border: 1px solid var(--color-border);
   color: var(--color-accent);
-  padding: 0.8rem;
-  margin-left: 1rem;
+  padding: 0.6rem;
   border-radius: 8px;
   cursor: pointer;
   z-index: 101;
@@ -258,23 +335,54 @@ img {
   align-items: center;
   justify-content: center;
 }
+
+@media (max-width: 1024px) {
+  .sidebar-toggle {
+    display: flex;
+  }
+}
+
 .sidebar-toggle:hover {
   background: var(--color-accent-soft);
   border-color: var(--color-accent);
 }
-.sidebar-toggle svg {
-  width: 24px;
-  height: 24px;
-}
+
 .content-area {
   flex: 1;
   padding: 0;
   background-color: var(--color-base);
+  width: 100%;
 }
 
-@media (max-width: 1024px) {
-  .sidebar-toggle {
-    display: block;
+/* Responsive Table */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Metric Grid Responsive */
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  .metric-card {
+    padding: 1.25rem !important;
+  }
+}
+
+/* Chart Container Fixes */
+.chart-container {
+  min-height: 250px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    height: 200px !important;
   }
 }
 
@@ -1050,8 +1158,20 @@ img {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+
+@media (max-width: 1100px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .metric-card {
   background: var(--color-panel-bg);
