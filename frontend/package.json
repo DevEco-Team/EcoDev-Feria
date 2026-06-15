@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd dev-eco-feria && npm install --legacy-peer-deps && NODE_OPTIONS=--max-old-space-size=2048 npm run build",
+    "build": "cd dev-eco-feria && npm install --legacy-peer-deps && NODE_OPTIONS='--max-old-space-size=450' npx ng build --configuration production --source-map=false",
     "start": "cd dev-eco-feria && npm run serve:ssr:dev-eco-feria"
   }
 }
