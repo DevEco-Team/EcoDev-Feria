@@ -113,7 +113,6 @@ export class SidebarComponent {
                 <li><b>Partículas PM2.5:</b> ${latest.particulas} mg/m³</li>
                 <li><b>Humedad:</b> ${latest.humedad}%</li>
                 <li><b>Temperatura:</b> ${latest.temperatura}°C</li>
-                <li><b>Benceno:</b> ${latest.benceno} ppb</li>
                 <li><b>Presencia de Humo:</b> ${latest.humo} u</li>
               </ul>
             ` : '<p><i>No se registran datos recientes para esta estación.</i></p>'}

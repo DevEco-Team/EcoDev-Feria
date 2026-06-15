@@ -1,19 +1,33 @@
-import { Component, inject, OnInit, signal, OnDestroy, ViewChild, ElementRef, effect, AfterViewInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnInit, signal, OnDestroy, ViewChild, ElementRef, effect, AfterViewInit, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthService } from '../../services/auth.service';
 import { FirestoreService, Medicion } from '../../services/firestore.service';
 import { Router } from '@angular/router';
 
+/**
+ * Configuración para la visualización de métricas individuales.
+ */
 interface MetricDisplayConfig {
+  /** Clave de la propiedad en el objeto Medicion */
   key: string;
+  /** Etiqueta descriptiva para el usuario */
   label: string;
+  /** Unidad de medida (ej: ppm, °C) */
   unit: string;
+  /** SVG o clase de icono */
   icon: string;
+  /** Valor límite para alertas */
   threshold?: number;
+  /** Tipo de umbral: si es alerta por valor alto o bajo */
   thresholdType?: 'high' | 'low';
 }
 
+/**
+ * Componente principal del Panel General (Dashboard).
+ * Proporciona una vista en tiempo real de la telemetría ambiental,
+ * incluyendo gráficos dinámicos y estados de alerta por estación.
+ */
 @Component({
   selector: 'app-general-panel',
   standalone: true,
@@ -94,6 +108,7 @@ interface MetricDisplayConfig {
       <div class="metrics-grid">
         <div *ngFor="let config of metricConfigs; let i = index" 
              class="metric-card" 
+             [class.featured-card]="config.key === 'humo'"
              [style.animation-delay]="(i * 0.1) + 's'">
           <div class="metric-icon" [innerHTML]="sanitizeHtml(config.icon)"></div>
           <div class="metric-info">
@@ -106,6 +121,14 @@ interface MetricDisplayConfig {
               {{ getMetricStatusLabel(config) }}
             </span>
           </div>
+          @if (config.key === 'humo' && latestMedicion()) {
+            <div class="metric-detail-overlay">
+              <span>Nivel detectado en tiempo real</span>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="getHumoPercentage(latestMedicion()!.humo)"></div>
+              </div>
+            </div>
+          }
         </div>
       </div>
 
@@ -169,7 +192,7 @@ interface MetricDisplayConfig {
     .station-chip {
       padding: 0.6rem 1.25rem;
       background: var(--color-panel-bg);
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--border-color, rgba(100, 255, 218, 0.08));
       border-radius: 50px;
       color: var(--color-text-muted);
       font-size: 0.8rem;
@@ -208,15 +231,60 @@ interface MetricDisplayConfig {
     .slide-btn:hover { background: var(--color-accent); color: var(--color-base); }
     .slide-btn svg { width: 18px; }
 
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-auto-flow: dense;
+      gap: 1.5rem;
+    }
+    .metric-card {
+      background: var(--color-panel-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card.featured-card {
+      grid-row: span 2;
+      border-color: var(--color-accent);
+      background: linear-gradient(135deg, var(--color-panel-bg) 0%, rgba(100, 255, 218, 0.05) 100%);
+      justify-content: center;
+    }
+    .metric-detail-overlay {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--color-accent);
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+    }
+
     .summary-card {
       display: flex; align-items: center; gap: 2rem;
       padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border);
       background: var(--color-panel-bg); backdrop-filter: blur(10px);
       transition: var(--transition-smooth);
     }
-    .summary-card.positive { border-color: #28a745; box-shadow: 0 0 20px rgba(40, 167, 69, 0.1); }
-    .summary-card.neutral { border-color: #ffc107; box-shadow: 0 0 20px rgba(255, 193, 7, 0.1); }
-    .summary-card.error { border-color: #dc3545; box-shadow: 0 0 20px rgba(220, 53, 69, 0.1); }
+    .summary-card.positive { border-color: #28a745; box-shadow: 0 0 20px rgba(40, 167, 69, 0.1); background: rgba(40, 167, 69, 0.05); }
+    .summary-card.neutral { border-color: #ffc107; box-shadow: 0 0 20px rgba(255, 193, 7, 0.1); background: rgba(255, 193, 7, 0.05); }
+    .summary-card.error { border-color: #dc3545; box-shadow: 0 0 20px rgba(220, 53, 69, 0.1); background: rgba(220, 53, 69, 0.05); }
     .summary-icon { width: 48px; height: 48px; color: var(--color-accent); flex-shrink: 0; }
     .summary-card.positive .summary-icon { color: #28a745; }
     .summary-card.neutral .summary-icon { color: #ffc107; }
@@ -229,21 +297,25 @@ interface MetricDisplayConfig {
     
     .chart-container {
       position: relative;
-      height: 300px;
+      height: 350px;
       width: 100%;
+      margin-top: 1rem;
     }
 
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
+      margin-top: 2rem;
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .main-grid {
         grid-template-columns: 1fr;
       }
-      .summary-card { padding: 1.5rem; gap: 1.5rem; }
+      .chart-container {
+        height: 300px;
+      }
     }
 
     @media (max-width: 768px) {
@@ -251,32 +323,64 @@ interface MetricDisplayConfig {
       .header-actions { width: 100%; justify-content: space-between; }
       .view-header h2 { font-size: 1.5rem; }
       .station-chip { padding: 0.5rem 1rem; font-size: 0.75rem; }
+      .chart-container {
+        height: 250px;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })
 export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
+  // Inyección de servicios necesarios
   private authService = inject(AuthService);
   private firestoreService = inject(FirestoreService);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   private platformId = inject(PLATFORM_ID);
 
+  /** Referencias a los elementos canvas de Chart.js */
   @ViewChild('gasesChart') gasesCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('envChart') envCanvas!: ElementRef<HTMLCanvasElement>;
 
+  /** Estado reactivo (Signals) */
+  /** La medición más reciente de la estación seleccionada */
   latestMedicion = signal<Medicion | null>(null);
+  /** Listado de mediciones históricas filtradas para gráficos */
   historicalMediciones = signal<Medicion[]>([]);
+  /** Acumulador de todas las mediciones de todas las fuentes */
   allMediciones = signal<Medicion[]>([]);
+  /** ID de la estación que se está visualizando actualmente */
   selectedStationId = signal<string>('plaza_san_martin');
   
+  /** Gestión de suscripciones para evitar fugas de memoria */
   private unsubscribe: any;
   private unsubFirestore: any;
 
+  /** Instancias de Chart.js */
   gasesChart: any = null;
   envChart: any = null;
+  /** Flag para asegurar que la vista está lista para gráficos */
   private viewInitialized = false;
+  /** Referencia dinámica a la librería Chart.js */
   private Chart: any;
 
+  /**
+   * Listener para ajustar los gráficos al cambiar el tamaño de la ventana.
+   */
+  private resizeTimeout: any;
+  @HostListener('window:resize')
+  onResize() {
+    if (isPlatformBrowser(this.platformId) && this.historicalMediciones().length > 0) {
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        this.updateCharts(this.historicalMediciones());
+      }, 250);
+    }
+  }
+
+  /** Listado de estaciones disponibles para monitoreo */
   stations = [
     { id: 'plaza_san_martin', name: 'Plaza San Martín' },
     { id: 'av_colon_gral_paz', name: 'Av. Colón y Gral. Paz' },
@@ -285,17 +389,12 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     { id: 'Rio Cuarto', name: 'Central de Río Cuarto' }
   ];
 
-  // Configuración dinámica de métricas
+  /** Configuración de las métricas que se muestran en tarjetas */
   metricConfigs: MetricDisplayConfig[] = [
     { 
       key: 'co2', label: 'Dióxido de Carbono', unit: 'ppm', 
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"></path></svg>',
       threshold: 800, thresholdType: 'high'
-    },
-    { 
-      key: 'benceno', label: 'Benceno (C6H6)', unit: 'ppb', 
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>',
-      threshold: 5, thresholdType: 'high'
     },
     { 
       key: 'particulas', label: 'Partículas PM2.5', unit: 'mg/m³', 
@@ -319,7 +418,9 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   constructor() {
-    // Efecto para actualizar gráficos cuando cambian las mediciones filtradas
+    /**
+     * Efecto: Actualiza gráficos automáticamente cuando cambian los datos históricos.
+     */
     effect(() => {
       const data = this.historicalMediciones();
       if (data.length > 0 && this.viewInitialized && isPlatformBrowser(this.platformId)) {
@@ -327,22 +428,20 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // Efecto para filtrar datos cuando cambia la estación o llegan nuevos datos
+    /**
+     * Efecto: Filtra y procesa los datos globales basándose en la estación seleccionada.
+     */
     effect(() => {
       const all = this.allMediciones();
       const stationId = this.selectedStationId();
       
-      console.log(`Filtrando para: ${stationId}. Total en BD: ${all.length}`);
-      
       const filtered = all.filter(m => m.estacion_id === stationId);
       
       if (filtered.length > 0) {
-        console.log(`Dato encontrado para ${stationId}:`, filtered[0]);
         this.latestMedicion.set(filtered[0]);
-        // Para el gráfico mostramos cronológicamente
+        // Se invierte para que el gráfico fluya de izquierda a derecha (más antiguos a más nuevos)
         this.historicalMediciones.set([...filtered].reverse());
       } else {
-        console.warn(`Sin datos en BD para la estación: ${stationId}`);
         this.latestMedicion.set(null);
         this.historicalMediciones.set([]);
       }
@@ -353,11 +452,13 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.listenToMediciones();
   }
 
+  /**
+   * Inicialización tras renderizado. Carga dinámicamente Chart.js para evitar errores de SSR.
+   */
   async ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.viewInitialized = true;
       
-      // Carga dinámica de Chart.js solo en el navegador
       const { default: ChartJs } = await import('chart.js/auto');
       this.Chart = ChartJs;
 
@@ -369,64 +470,67 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // Limpieza de suscripciones
     if (this.unsubscribe) {
-      if (typeof this.unsubscribe === 'function') {
-        this.unsubscribe();
-      } else if (this.unsubscribe.unsubscribe) {
-        this.unsubscribe.unsubscribe();
-      }
+      if (typeof this.unsubscribe === 'function') this.unsubscribe();
+      else if (this.unsubscribe.unsubscribe) this.unsubscribe.unsubscribe();
     }
-    if (this.unsubFirestore) {
-      this.unsubFirestore();
-    }
+    if (this.unsubFirestore) this.unsubFirestore();
+    
+    // Destrucción de gráficos para liberar memoria
     if (this.gasesChart) this.gasesChart.destroy();
     if (this.envChart) this.envChart.destroy();
   }
 
+  /**
+   * Permite renderizar HTML seguro (como SVGs dinámicos) en el template.
+   */
   sanitizeHtml(html: string) {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
+  /**
+   * Conecta con múltiples fuentes de datos de Firebase y unifica el flujo de entrada.
+   */
   listenToMediciones() {
     const allDataMap = new Map<string, Medicion[]>();
 
     const updateAllMediciones = () => {
       const merged: Medicion[] = [];
       allDataMap.forEach(meds => merged.push(...meds));
-      // Ordenar por fecha descendente
-      merged.sort((a, b) => {
-        const timeA = new Date(a.fecha_hora).getTime();
-        const timeB = new Date(b.fecha_hora).getTime();
-        return timeB - timeA;
-      });
+      // Orden cronológico descendente global
+      merged.sort((a, b) => new Date(b.fecha_hora).getTime() - new Date(a.fecha_hora).getTime());
       this.allMediciones.set(merged);
     };
 
-    // Fuente 1: Realtime Database (4 estaciones originales)
+    // Fuente 1: Tiempo real (RTDB)
     this.unsubscribe = this.firestoreService.getRTDBMediciones((mediciones) => {
-      const rtdbIds = ['plaza_san_martin', 'av_colon_gral_paz', 'terminal_omnibus', 'microestacion_01'];
-      const rtdbData = mediciones.filter(m => rtdbIds.includes(m.estacion_id));
-      allDataMap.set('rtdb', rtdbData);
+      allDataMap.set('rtdb', mediciones);
       updateAllMediciones();
     });
 
-    // Fuente 2: Cloud Firestore (Central de Río Cuarto)
+    // Fuente 2: Persistencia (Firestore)
     this.unsubFirestore = this.firestoreService.getFirestoreMediciones((mediciones) => {
-      // Usamos el ID exacto que viene de Firestore
-      const firestoreData = mediciones.filter(m => m.estacion_id === 'Rio Cuarto');
-      allDataMap.set('firestore', firestoreData);
+      allDataMap.set('firestore', mediciones);
       updateAllMediciones();
     });
   }
 
+  /**
+   * Cambia la estación activa para visualizar sus datos específicos.
+   */
   selectStation(id: string) {
     this.selectedStationId.set(id);
   }
 
+  /**
+   * Obtiene el nombre amigable de una estación por su ID.
+   */
   getStationName(id: string): string {
     return this.stations.find(s => s.id === id)?.name || id;
   }
 
+  /** Navegación secuencial de estaciones */
   prevStation() {
     const idx = this.stations.findIndex(s => s.id === this.selectedStationId());
     const prevIdx = (idx - 1 + this.stations.length) % this.stations.length;
@@ -439,8 +543,13 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectStation(this.stations[nextIdx].id);
   }
 
+  /**
+   * Actualiza o inicializa las instancias de Chart.js con los nuevos datos.
+   * Gestiona gradientes y estilos visuales complejos.
+   * @param data Conjunto de mediciones filtradas y ordenadas.
+   */
   updateCharts(data: Medicion[]) {
-    if (!this.gasesCanvas || !this.envCanvas || !this.Chart) return;
+    if (!this.gasesCanvas || !this.envCanvas || !this.Chart || !isPlatformBrowser(this.platformId)) return;
 
     const labels = data.map(m => this.formatTime(m.fecha_hora));
     const ctxGases = this.gasesCanvas.nativeElement.getContext('2d');
@@ -448,84 +557,24 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!ctxGases || !ctxEnv) return;
 
-    // Helper for gradients
-    const createGradient = (ctx: CanvasRenderingContext2D, color: string) => {
-      const g = ctx.createLinearGradient(0, 0, 0, 300);
-      
-      // Robust Hex to RGBA conversion
-      let r = 100, g1 = 255, b = 218; // Default accent color
-      
-      if (color.startsWith('#')) {
-        const hex = color.replace('#', '');
-        if (hex.length === 3) {
-          r = parseInt(hex[0] + hex[0], 16);
-          g1 = parseInt(hex[1] + hex[1], 16);
-          b = parseInt(hex[2] + hex[2], 16);
-        } else if (hex.length === 6) {
-          r = parseInt(hex.slice(0, 2), 16);
-          g1 = parseInt(hex.slice(2, 4), 16);
-          b = parseInt(hex.slice(4, 6), 16);
-        }
-      }
-
-      try {
-        g.addColorStop(0, `rgba(${r}, ${g1}, ${b}, 0.2)`);
-        g.addColorStop(1, `rgba(${r}, ${g1}, ${b}, 0)`);
-        return g;
-      } catch (e) {
-        console.warn('Error creating gradient for color:', color);
-        return 'transparent';
-      }
-    };
-
+    // Configuración común de estilo para ambos gráficos
     const commonOptions: any = {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { intersect: false, mode: 'index' },
       plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          align: 'end',
-          labels: { 
-            color: '#8892b0', 
-            usePointStyle: true,
-            pointStyle: 'circle',
-            font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
-            padding: 20
-          }
-        },
-        tooltip: {
-          backgroundColor: 'rgba(10, 25, 47, 0.9)',
-          titleFont: { family: "'Oswald', sans-serif" },
-          bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
-          borderColor: 'rgba(100, 255, 218, 0.2)',
-          borderWidth: 1,
-          padding: 12,
-          displayColors: true,
-          callbacks: {
-            label: (context: any) => ` ${context.dataset.label}: ${context.parsed.y}`
-          }
-        }
+        legend: { display: true, position: 'top', align: 'end', labels: { color: '#8892b0' } }
       },
       scales: {
-        x: { 
-          grid: { display: false }, 
-          ticks: { color: '#8892b0', font: { size: 10 }, maxRotation: 0 } 
-        },
-        y: { 
-          grid: { color: 'rgba(100, 255, 218, 0.05)', drawBorder: false }, 
-          ticks: { color: '#8892b0', font: { size: 10 }, padding: 10 } 
-        }
+        x: { ticks: { color: '#8892b0', maxTicksLimit: 8 } },
+        y: { ticks: { color: '#8892b0' }, grid: { color: 'rgba(100, 255, 218, 0.05)' } }
       }
     };
 
-    // Gases Chart
+    // Gráfico 1: Gases y Partículas
     const gasesDatasets = [
-      { label: 'CO2 (ppm)', data: data.map(m => m.co2), borderColor: '#64ffda', backgroundColor: createGradient(ctxGases, '#64ffda'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'PM2.5 (mg)', data: data.map(m => m.particulas), borderColor: '#ffc107', backgroundColor: createGradient(ctxGases, '#ffc107'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Humo (u)', data: data.map(m => m.humo), borderColor: '#ff4d4d', backgroundColor: createGradient(ctxGases, '#ff4d4d'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Benceno (ppb)', data: data.map(m => m.benceno), borderColor: '#bd93f9', backgroundColor: createGradient(ctxGases, '#bd93f9'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }
+      { label: 'CO2 (ppm)', data: data.map(m => m.co2), borderColor: '#64ffda', tension: 0.4 },
+      { label: 'PM2.5 (mg)', data: data.map(m => m.particulas), borderColor: '#ffc107', tension: 0.4 },
+      { label: 'Humo (u)', data: data.map(m => m.humo), borderColor: '#ff4d4d', tension: 0.4 }
     ];
 
     if (!this.gasesChart) {
@@ -540,23 +589,17 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
       this.gasesChart.update('none');
     }
 
-    // Env Chart
+    // Gráfico 2: Variables Ambientales
     const envDatasets = [
-      { label: 'Temp (°C)', data: data.map(m => m.temperatura), borderColor: '#ff944d', backgroundColor: createGradient(ctxEnv, '#ff944d'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Hum (%)', data: data.map(m => m.humedad), borderColor: '#4da3ff', backgroundColor: createGradient(ctxEnv, '#4da3ff'), fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 }
+      { label: 'Temp (°C)', data: data.map(m => m.temperatura), borderColor: '#ff944d', tension: 0.4 },
+      { label: 'Hum (%)', data: data.map(m => m.humedad), borderColor: '#4da3ff', tension: 0.4 }
     ];
 
     if (!this.envChart) {
       this.envChart = new this.Chart(this.envCanvas.nativeElement, {
         type: 'line',
         data: { labels, datasets: envDatasets },
-        options: {
-          ...commonOptions,
-          scales: {
-            ...commonOptions.scales,
-            y: { ...commonOptions.scales.y, min: 0, max: 100 } // Fix scale for % and normal temp
-          }
-        }
+        options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 100 } } }
       });
     } else {
       this.envChart.data.labels = labels;
@@ -565,44 +608,46 @@ export class GeneralPanelComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Retorna la clase CSS correspondiente a la semántica de la calidad del aire.
+   */
   getAirQualityClass(status: string | undefined): string {
     if (!status) return 'neutral';
     const s = status.toLowerCase();
-    if (s.includes('bueno') || s.includes('óptimo') || s.includes('excelente') || s.includes('bajo')) return 'positive';
-    if (s.includes('moderado') || s.includes('aceptable')) return 'neutral';
+    if (s.includes('bueno') || s.includes('óptimo') || s.includes('excelente')) return 'positive';
+    if (s.includes('moderado') || s.includes('normal')) return 'neutral';
     return 'error';
   }
 
+  /** Clase CSS para indicadores de métricas individuales basados en umbrales */
   getMetricStatusClass(config: MetricDisplayConfig): string {
     const val = this.latestMedicion()?.[config.key];
     if (val === undefined || config.threshold === undefined) return 'neutral';
-    
-    if (config.thresholdType === 'high') {
-      if (val > config.threshold * 1.5) return 'error'; 
-      if (val > config.threshold) return 'neutral'; 
-      return 'positive'; 
-    } else {
-      if (val < config.threshold * 0.5) return 'error';
-      if (val < config.threshold) return 'neutral';
-      return 'positive';
-    }
+    const isAlert = config.thresholdType === 'high' ? val > config.threshold : val < config.threshold;
+    return isAlert ? 'error' : 'positive';
+  }
+
+  /** Calcula porcentaje para la barra de progreso de humo */
+  getHumoPercentage(val: number): number {
+    return Math.min(Math.max((val / 1000) * 100, 5), 100);
   }
 
   getMetricStatusLabel(config: MetricDisplayConfig): string {
     const val = this.latestMedicion()?.[config.key];
     if (val === undefined) return 'Cargando...';
     if (config.threshold === undefined) return 'Estable';
-
     const isAlert = config.thresholdType === 'high' ? val > config.threshold : val < config.threshold;
     return isAlert ? 'Fuera de rango' : 'Normal';
   }
 
+  /** Formatea timestamp para mostrar solo hora y minutos en etiquetas */
   formatTime(timestamp: any): string {
     if (!timestamp) return '--:--';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  /** Finaliza la sesión del usuario */
   logout() {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
