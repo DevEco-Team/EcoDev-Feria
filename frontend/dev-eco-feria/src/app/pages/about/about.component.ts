@@ -23,7 +23,8 @@ import { FooterComponent } from '../../layout/footer.component';
       <div class="team-flex animate-fade-in" style="animation-delay: 0.2s;">
         <div class="member-card" *ngFor="let member of equipoFila1">
           <div class="member-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <img *ngIf="member.image" [src]="member.image" [alt]="member.name" class="avatar-img">
+            <svg *ngIf="!member.image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <h3>{{member.name}}</h3>
           <span class="member-role">{{member.role}}</span>
@@ -33,7 +34,8 @@ import { FooterComponent } from '../../layout/footer.component';
       <div class="team-flex animate-fade-in" style="animation-delay: 0.3s; margin-bottom: 8rem;">
         <div class="member-card" *ngFor="let member of equipoFila2">
           <div class="member-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <img *ngIf="member.image" [src]="member.image" [alt]="member.name" class="avatar-img">
+            <svg *ngIf="!member.image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <h3>{{member.name}}</h3>
           <span class="member-role">{{member.role}}</span>
@@ -69,17 +71,17 @@ import { FooterComponent } from '../../layout/footer.component';
 export class AboutComponent {
   /** Primera fila del equipo de desarrollo, enfocada en hardware, QA y UI. */
   equipoFila1 = [
-    { name: 'Luciano Cañas', role: 'Desarrollo de Hardware & IoT' },
-    { name: 'Lorena Paola Pereyra', role: 'Scrum Master & QA Testing' },
-    { name: 'Agustin Nicolas Gallardo Rios', role: 'Frontend Developer & Diseño UI' }
+    { name: 'Luciano Cañas', role: 'Desarrollo de Hardware & IoT', image: '' },
+    { name: 'Lorena Pereyra', role: 'Scrum Master & QA Testing', image: 'assets/Lorena_Pereyra.jpeg' },
+    { name: 'Agustin Nicolas Gallardo Rios', role: 'Frontend Developer & Diseño UI', image: 'assets/Agustin_Nicolas_Gallardo_Rios.jpeg' }
   ];
 
   /** Segunda fila del equipo de desarrollo, enfocada en frontend, hardware y backend. */
   equipoFila2 = [
-    { name: 'Agustin Tanno', role: 'Frontend Developer & Integración Web' },
-    { name: 'Romina Vanesa Huk', role: 'Ingeniería de Hardware & Sensores' },
-    { name: 'Nancy Maribel Morales', role: 'Backend Developer & Arquitectura Cloud' },
-    { name: 'Julieta Cabrera', role: 'Backend Developer & Firebase' }
+    { name: 'Agustin Tanno', role: 'Frontend Developer & Integración Web', image: '' },
+    { name: 'Romina Huk', role: 'Ingeniería de Hardware & Sensores', image: 'assets/Romina_Huk.jpeg' },
+    { name: 'Nancy Maribel Morales', role: 'Backend Developer & Arquitectura Cloud', image: 'assets/Nancy_Maribel_Morales.jpeg' },
+    { name: 'Julieta Cabrera', role: 'Backend Developer & Firebase', image: 'assets/Julieta_Cabrera.jpeg' }
   ];
 
   /** Lista de profesores que supervisan el proyecto. */

@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { initializeApp, provideFirebaseApp, getApp, getApps } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getFirestore, provideFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
 import { getDatabase, provideDatabase } from '@angular/fire/database';
 import { firebaseConfig } from '../environments/firebase.config';
 

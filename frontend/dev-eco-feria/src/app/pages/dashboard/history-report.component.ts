@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FirestoreService, Medicion } from '../../services/firestore.service';
 import { ExportService } from '../../services/export.service';
 
+/**
+ * Componente encargado de visualizar el historial detallado de mediciones.
+ * Permite filtrar por estación y exportar los datos recolectados.
+ */
 @Component({
   selector: 'app-history-report',
   standalone: true,
@@ -44,10 +48,10 @@ import { ExportService } from '../../services/export.service';
             <tr *ngFor="let item of mediciones()">
               <td class="text-nowrap">{{ formatDate(item.fecha_hora) }}</td>
               <td><strong>{{ item.estacion_id }}</strong></td>
-              <td>{{ item.co2 }} <small>ppm</small></td>
-              <td>{{ item.particulas }} <small>mg/m³</small></td>
+              <td [class.alert-val]="item.co2 > 1000">{{ item.co2 }} <small>ppm</small></td>
+              <td [class.alert-val]="item.particulas > 50">{{ item.particulas }} <small>mg/m³</small></td>
               <td>{{ item.temperatura }}°C / {{ item.humedad }}%</td>
-              <td>{{ item.humo }} <small>u</small></td>
+              <td [class.alert-val]="item.humo > 200">{{ item.humo }} <small>u</small></td>
               <td>
                 <span class="status-tag" [class]="getAirQualityClass(item.estado_calidad_aire)">
                   {{ item.estado_calidad_aire }}
@@ -161,13 +165,18 @@ import { ExportService } from '../../services/export.service';
     .status-tag.positive { background: rgba(40, 167, 69, 0.1); color: #28a745; border: 1px solid #28a745; }
     .status-tag.neutral { background: rgba(255, 193, 7, 0.1); color: #ffc107; border: 1px solid #ffc107; }
     .status-tag.error { background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid #dc3545; }
+    .alert-val { color: #dc3545; font-weight: 700; }
   `]
 })
 export class HistoryReportComponent implements OnInit, OnDestroy {
+  // Inyección de servicios
   private firestoreService = inject(FirestoreService);
   private exportService = inject(ExportService);
   
+  /** Signal que contiene la lista de mediciones históricas a mostrar en la tabla */
   mediciones = signal<Medicion[]>([]);
+  
+  /** Referencias a las suscripciones de Firebase para limpieza */
   private unsubRTDB: any;
   private unsubFirestore: any;
 
@@ -176,6 +185,7 @@ export class HistoryReportComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // Asegurar la desconexión de los listeners de Firebase
     if (this.unsubRTDB) {
       if (typeof this.unsubRTDB === 'function') this.unsubRTDB();
       else if (this.unsubRTDB.unsubscribe) this.unsubRTDB.unsubscribe();
@@ -185,57 +195,72 @@ export class HistoryReportComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Suscribe a los cambios en el historial de mediciones (Firestore y RTDB).
+   * Fusiona ambas fuentes y las ordena cronológicamente.
+   */
   listenToHistory() {
     const allDataMap = new Map<string, Medicion[]>();
 
     const updateView = () => {
       const merged: Medicion[] = [];
       allDataMap.forEach(meds => merged.push(...meds));
+      // Ordenar por fecha descendente (más recientes primero)
       merged.sort((a, b) => new Date(b.fecha_hora).getTime() - new Date(a.fecha_hora).getTime());
       this.mediciones.set(merged);
     };
 
-    // Fuente 1: RTDB
+    // Fuente 1: Historial de RTDB
     this.unsubRTDB = this.firestoreService.getRTDBMedicionesHistory(50, (data) => {
       allDataMap.set('rtdb', data);
       updateView();
     });
 
-    // Fuente 2: Firestore
+    // Fuente 2: Historial de Firestore (Failover)
     this.unsubFirestore = this.firestoreService.getFirestoreMediciones((data) => {
       allDataMap.set('firestore', data);
       updateView();
     });
   }
 
+  /**
+   * Formatea la fecha para visualización en tabla.
+   * @param timestamp Valor de fecha crudo.
+   */
   formatDate(timestamp: any): string {
     if (!timestamp) return '---';
     const date = new Date(timestamp);
     return date.toLocaleString();
   }
 
+  /**
+   * Retorna la clase CSS basada en la semántica de calidad del aire para las etiquetas.
+   */
   getAirQualityClass(status: string | undefined): string {
     if (!status) return 'neutral';
     const s = status.toLowerCase();
     
     // VERDE: Óptimo, Bueno, Excelente, Bajo
-    if (s.includes('óptimo') || s.includes('bueno') || s.includes('excelente') || s.includes('bajo')) {
+    if (s.includes('óptimo') || s.includes('optimo') || s.includes('bueno') || s.includes('excelente') || s.includes('bajo')) {
       return 'positive';
     }
     
-    // AMARILLO: Moderado, Aceptable, Normal
-    if (s.includes('moderado') || s.includes('aceptable') || s.includes('normal')) {
+    // AMARILLO: Moderado, Aceptable, Medio, Normal
+    if (s.includes('moderado') || s.includes('aceptable') || s.includes('medio') || s.includes('normal')) {
       return 'neutral';
     }
     
     // ROJO: Alerta, Riesgo, Crítico, Peligro, Malo
-    if (s.includes('alerta') || s.includes('riesgo') || s.includes('crítico') || s.includes('peligro') || s.includes('malo')) {
+    if (s.includes('alerta') || s.includes('riesgo') || s.includes('crítico') || s.includes('critico') || s.includes('peligro') || s.includes('malo')) {
       return 'error';
     }
     
     return 'neutral';
   }
 
+  /**
+   * Procesa y exporta las mediciones actuales a un archivo Excel.
+   */
   exportData() {
     const dataToExport = this.mediciones().map(m => ({
       Fecha_Hora: this.formatDate(m.fecha_hora),
@@ -245,7 +270,6 @@ export class HistoryReportComponent implements OnInit, OnDestroy {
       Temperatura_C: m.temperatura,
       Humedad_porc: m.humedad,
       Humo_u: m.humo,
-      Benceno_ppb: m.benceno,
       Estado: m.estado_calidad_aire
     }));
 
