@@ -8,7 +8,9 @@ import {
   user,
   updateProfile,
   sendPasswordResetEmail,
-  updatePassword
+  updatePassword,
+  GoogleAuthProvider,
+  signInWithPopup
 } from '@angular/fire/auth';
 import { Firestore, doc, setDoc, getDoc, updateDoc, enableNetwork } from '@angular/fire/firestore';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,6 +26,9 @@ export class AuthService {
   private router = inject(Router);
   private injector = inject(Injector);
   
+  // Proveedor de Google
+  private googleProvider = new GoogleAuthProvider();
+
   // Observamos el estado de autenticación de Firebase
   private firebaseUser$ = user(this.auth);
   private _currentUser: any;
@@ -70,6 +75,8 @@ export class AuthService {
           console.log("Datos de usuario cargados:", docSnap.data());
         } else {
           console.warn("No se encontró el documento del usuario en Firestore.");
+          // Si es un login con Google, quizás el documento no exista aún
+          // Podríamos intentar crearlo aquí si tenemos los datos del auth user
         }
       } catch (error: any) {
         console.error("Error al cargar datos de usuario:", error);
@@ -112,6 +119,40 @@ export class AuthService {
         return { success: true };
       } catch (error: any) {
         console.error("Login error:", error);
+        return { success: false, error: error.code || error.message };
+      }
+    });
+  }
+
+  async loginWithGoogle() {
+    return runInInjectionContext(this.injector, async () => {
+      try {
+        const result = await signInWithPopup(this.auth, this.googleProvider);
+        const user = result.user;
+
+        // Verificar si el usuario ya existe en Firestore
+        const userRef = doc(this.firestore, `usuarios/${user.uid}`);
+        const docSnap = await getDoc(userRef);
+
+        if (!docSnap.exists()) {
+          // Si es un usuario nuevo de Google, registrarlo en Firestore
+          const userData = {
+            id: user.uid,
+            nombre: user.displayName || 'Usuario de Google',
+            email: user.email,
+            foto: user.photoURL,
+            rol: 'usuario',
+            fecha_registro: new Date().toISOString()
+          };
+          await setDoc(userRef, userData);
+          this._userData.set(userData);
+        } else {
+          this._userData.set(docSnap.data());
+        }
+
+        return { success: true };
+      } catch (error: any) {
+        console.error("Google login error:", error);
         return { success: false, error: error.code || error.message };
       }
     });

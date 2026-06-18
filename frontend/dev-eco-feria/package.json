@@ -11,6 +11,14 @@
   },
   "private": true,
   "packageManager": "npm@10.9.4",
+  "overrides": {
+    "@angular/fire": {
+      "@angular/common": "$@angular/common",
+      "@angular/core": "$@angular/core",
+      "@angular/platform-browser": "$@angular/platform-browser",
+      "@angular/platform-server": "$@angular/platform-server"
+    }
+  },
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",

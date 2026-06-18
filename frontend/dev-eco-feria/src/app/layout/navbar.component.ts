@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ThemeService } from '../services/theme.service';
+import { ConnectivityService } from '../services/connectivity.service';
 
 /**
  * Componente de la barra de navegación superior.
@@ -29,11 +30,19 @@ import { ThemeService } from '../services/theme.service';
         <ul class="nav-links" [class.mobile-open]="isMenuOpen">
           <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Inicio</a></li>
           <li><a routerLink="/equipo" routerLinkActive="active" (click)="closeMenu()">Quiénes Somos</a></li>
+          <li><a routerLink="/historia" routerLinkActive="active" (click)="closeMenu()">Historia</a></li>
           <li class="mobile-only">
             <div class="nav-cta">
-              <span class="status-badge">
-                <span class="dot pulse"></span> Red Online
-              </span>
+              <div class="connectivity-wrapper">
+                <span class="status-badge" [class.offline]="!connectivityService.isOnline()">
+                  <span class="dot" [class.pulse]="connectivityService.isOnline()"></span> 
+                  {{ connectivityService.isOnline() ? 'Red Online' : 'Modo Offline' }}
+                </span>
+                <label class="switch nav-switch" title="Simular desconexión">
+                  <input type="checkbox" [checked]="connectivityService.isOnline()" (change)="connectivityService.toggleConnection()">
+                  <span class="slider"></span>
+                </label>
+              </div>
               <div class="nav-icons">
                 <button (click)="themeService.toggleTheme()" class="icon-link theme-toggle" [title]="themeService.isDarkMode() ? 'Modo Día' : 'Modo Noche'">
                   <svg *ngIf="themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -52,9 +61,16 @@ import { ThemeService } from '../services/theme.service';
         </ul>
 
         <div class="nav-cta desktop-only">
-          <span class="status-badge">
-            <span class="dot pulse"></span> Red Online
-          </span>
+          <div class="connectivity-wrapper">
+            <span class="status-badge" [class.offline]="!connectivityService.isOnline()">
+              <span class="dot" [class.pulse]="connectivityService.isOnline()"></span> 
+              {{ connectivityService.isOnline() ? 'Red Online' : 'Modo Offline' }}
+            </span>
+            <label class="switch nav-switch" title="Simular desconexión">
+              <input type="checkbox" [checked]="connectivityService.isOnline()" (change)="connectivityService.toggleConnection()">
+              <span class="slider"></span>
+            </label>
+          </div>
           <div class="nav-icons">
             <button (click)="themeService.toggleTheme()" class="icon-link theme-toggle" [title]="themeService.isDarkMode() ? 'Modo Día' : 'Modo Noche'">
               <svg *ngIf="themeService.isDarkMode()" class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -78,6 +94,8 @@ export class NavbarComponent {
   public authService = inject(AuthService);
   /** Servicio de tema para gestionar el modo claro/oscuro. */
   public themeService = inject(ThemeService);
+  /** Servicio de conectividad para detectar estado offline. */
+  public connectivityService = inject(ConnectivityService);
   
   /** Indica si el menú móvil está abierto. */
   isMenuOpen = false;
